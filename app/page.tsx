@@ -1,13 +1,18 @@
-'use client'
+"use client"
 
-import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { ArrowDown, Eye, Scale, Settings } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect, useRef } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowDown, Eye, Scale, Settings } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { LoginModal } from "@/components/LoginModal"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -16,6 +21,38 @@ export default function Home() {
 
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.95, 0.9])
+
+  useEffect(() => {
+    // Check if user is logged in (e.g., by checking a token in localStorage)
+    const token = localStorage.getItem("authToken")
+    setIsLoggedIn(!!token)
+  }, [])
+
+  const handleLogin = async (username: string, password: string) => {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    if (username === "demo" && password === "password") {
+      localStorage.setItem("authToken", "dummyToken")
+      setIsLoggedIn(true)
+      setIsLoginModalOpen(false)
+    } else {
+      throw new Error("Invalid credentials")
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken")
+    setIsLoggedIn(false)
+  }
+
+  const handleDashboardClick = () => {
+    if (isLoggedIn) {
+      router.push("/dashboard")
+    } else {
+      setIsLoginModalOpen(true)
+    }
+  }
 
   return (
     <div ref={containerRef} className="min-h-screen bg-gradient-to-b from-[#000B2E] via-[#001959] to-[#000B2E]">
@@ -28,14 +65,32 @@ export default function Home() {
             height={48}
             className="h-10 w-auto transform hover:scale-105 transition-transform duration-300"
           />
-          <Link href="/dashboard">
-            <Button 
-              variant="outline" 
-              className="text-white border-white/20 bg-white/5 hover:bg-white hover:text-black transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-            >
-              Go to Dashboard
-            </Button>
-          </Link>
+          <div className="flex items-center space-x-4">
+            {isLoggedIn ? (
+              <>
+                <Button
+                  onClick={handleDashboardClick}
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold transition-all duration-300 transform hover:scale-105"
+                >
+                  Go to Dashboard
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="text-white border-white/20 bg-white/5 hover:bg-white hover:text-black transition-all duration-300"
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={() => setIsLoginModalOpen(true)}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold transition-all duration-300 transform hover:scale-105"
+              >
+                Login
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -71,6 +126,20 @@ export default function Home() {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
+            >
+              <Button
+                onClick={handleDashboardClick}
+                size="lg"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                {isLoggedIn ? "Access Dashboard" : "Get Started"}
+              </Button>
+            </motion.div>
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="mt-12"
             >
               <ArrowDown className="w-12 h-12 mx-auto animate-bounce text-white/50" />
             </motion.div>
@@ -300,8 +369,11 @@ export default function Home() {
               </Link>
             </motion.div>
           </div>
-        </section>
+        </section>        
+        
       </main>
+
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
 
       <footer className="bg-black/50 backdrop-blur-md border-t border-white/10">
         <div className="container mx-auto px-4 py-12">
@@ -338,3 +410,5 @@ export default function Home() {
   )
 }
 
+        
+      
