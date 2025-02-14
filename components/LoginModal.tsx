@@ -1,35 +1,35 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface LoginModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onLogin: (username: string, password: string) => Promise<void>
+  isOpen: boolean;
+  onClose: () => void;
+  onLogin: (username: string, password: string) => Promise<void>;
 }
 
 export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
     try {
-      await onLogin(username, password)
+      await onLogin(username, password);
     } catch (err) {
-      setError("Invalid username or password")
+      setError("Invalid username or password");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <AnimatePresence>
@@ -55,7 +55,9 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
             >
               <X size={24} />
             </button>
-            <h2 className="text-3xl font-bold text-white mb-6 font-display">Login</h2>
+            <h2 className="text-3xl font-bold text-white mb-6 font-display">
+              Login
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Input
@@ -98,6 +100,5 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }
-
