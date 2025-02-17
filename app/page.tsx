@@ -1,67 +1,70 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowDown, Eye, Scale, Settings } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { LoginModal } from "@/components/LoginModal"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowDown, Eye, Scale, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LoginModal } from "@/components/LoginModal";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const router = useRouter()
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"]
-  })
+    offset: ["start start", "end end"],
+  });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.95, 0.9])
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.95, 0.9]);
 
   useEffect(() => {
     // Check if user is logged in (e.g., by checking a token in localStorage)
-    const token = localStorage.getItem("authToken")
-    setIsLoggedIn(!!token)
-  }, [])
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleLogin = async (username: string, password: string) => {
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     if (username === "demo" && password === "password") {
-      localStorage.setItem("authToken", "dummyToken")
-      setIsLoggedIn(true)
-      setIsLoginModalOpen(false)
+      localStorage.setItem("authToken", "dummyToken");
+      setIsLoggedIn(true);
+      setIsLoginModalOpen(false);
     } else {
-      throw new Error("Invalid credentials")
+      throw new Error("Invalid credentials");
     }
-  }
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken")
-    setIsLoggedIn(false)
-  }
+    localStorage.removeItem("authToken");
+    setIsLoggedIn(false);
+  };
 
   const handleDashboardClick = () => {
     if (isLoggedIn) {
-      router.push("/dashboard")
+      router.push("/dashboard");
     } else {
-      setIsLoginModalOpen(true)
+      setIsLoginModalOpen(true);
     }
-  }
+  };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gradient-to-b from-[#000B2E] via-[#001959] to-[#000B2E]">
+    <div
+      ref={containerRef}
+      className="min-h-screen bg-gradient-to-b from-[#000B2E] via-[#001959] to-[#000B2E]"
+    >
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#000B2E] border-b border-white/10">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <Image 
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BBI_Logo_White-B1geXfwkPqABQuJWmxC14tT8vx6ueV.png" 
-            alt="BBi Logo" 
-            width={120} 
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BBI_Logo_White-B1geXfwkPqABQuJWmxC14tT8vx6ueV.png"
+            alt="BBi Logo"
+            width={120}
             height={48}
             className="h-10 w-auto transform hover:scale-105 transition-transform duration-300"
           />
@@ -96,31 +99,32 @@ export default function Home() {
 
       <main className="pt-20">
         {/* Hero Section */}
-        <motion.section 
+        <motion.section
           style={{ opacity, scale }}
           className="min-h-screen flex items-center justify-center relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-b from-[#000B2E]/50 to-transparent pointer-events-none" />
           <div className="container mx-auto px-4 text-center relative z-10">
-            <motion.h1 
+            <motion.h1
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 font-display mb-6 drop-shadow-2xl"
-              style={{ fontFamily: 'var(--font-space-grotesk)' }}
+              style={{ fontFamily: "var(--font-space-grotesk)" }}
             >
               ABC Framework
               <span className="block text-4xl md:text-5xl mt-4 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent font-bold">
                 Overview
               </span>
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-white mb-12 max-w-2xl mx-auto font-semibold"
             >
-              A comprehensive approach to data management and control, reimagined for the future
+              A comprehensive approach to data management and control,
+              reimagined for the future
             </motion.p>
             <motion.div
               initial={{ y: 50, opacity: 0 }}
@@ -152,7 +156,7 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="grid gap-16">
               {/* Audit Section */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -167,17 +171,22 @@ export default function Home() {
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-all duration-500">
                           <Eye className="w-8 h-8" />
                         </div>
-                        <h2 className="text-4xl font-bold text-white" style={{ fontFamily: 'var(--font-space-grotesk)' }}>Audit</h2>
+                        <h2
+                          className="text-4xl font-bold text-white"
+                          style={{ fontFamily: "var(--font-space-grotesk)" }}
+                        >
+                          Audit
+                        </h2>
                       </div>
                       <ul className="space-y-4 text-blue-100/90">
                         {[
-                          'Audits provide traceability of data and processes',
-                          'Process version tracking',
-                          'Start and end times monitoring',
-                          'Record count tracking (Input, Rejected, Output)',
-                          'Certification and authority management'
+                          "Audits provide traceability of data and processes",
+                          "Process version tracking",
+                          "Start and end times monitoring",
+                          "Record count tracking (Input, Rejected, Output)",
+                          "Certification and authority management",
                         ].map((item, i) => (
-                          <motion.li 
+                          <motion.li
                             key={i}
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -191,16 +200,19 @@ export default function Home() {
                       </ul>
                     </div>
                     <div className="bg-gradient-to-br from-white/5 to-transparent p-8 rounded-2xl border border-white/10 shadow-2xl transform group-hover:scale-105 transition-all duration-500">
-                      <h3 className="text-2xl font-semibold text-white mb-6" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+                      <h3
+                        className="text-2xl font-semibold text-white mb-6"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
+                      >
                         Data Record Tracking
                       </h3>
                       <ul className="space-y-4 text-blue-100/90">
                         {[
-                          'Process creation tracking',
-                          'Update history',
-                          'Timestamp logging'
+                          "Process creation tracking",
+                          "Update history",
+                          "Timestamp logging",
                         ].map((item, i) => (
-                          <motion.li 
+                          <motion.li
                             key={i}
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -218,7 +230,7 @@ export default function Home() {
               </motion.div>
 
               {/* Balance Section */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -232,15 +244,19 @@ export default function Home() {
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 text-white flex items-center justify-center">
                           <Scale className="w-8 h-8" />
                         </div>
-                        <h2 className="text-4xl font-bold text-white">Balance</h2>
+                        <h2 className="text-4xl font-bold text-white">
+                          Balance
+                        </h2>
                       </div>
                       <ul className="space-y-4 text-green-100/90">
-                        {["Verifies proper dataset processing",
-                         "Independent comparison checks",
-                         "Lost record detection",
-                         "Computation error checking",
-                         "Quality confirmation for data and processes"].map((item, i) => (
-                          <motion.li 
+                        {[
+                          "Verifies proper dataset processing",
+                          "Independent comparison checks",
+                          "Lost record detection",
+                          "Computation error checking",
+                          "Quality confirmation for data and processes",
+                        ].map((item, i) => (
+                          <motion.li
                             key={i}
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -254,16 +270,19 @@ export default function Home() {
                       </ul>
                     </div>
                     <div className="bg-gradient-to-br from-white/5 to-transparent p-8 rounded-2xl border border-white/10 shadow-2xl transform group-hover:scale-105 transition-all duration-500">
-                      <h3 className="text-2xl font-semibold text-white mb-6" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+                      <h3
+                        className="text-2xl font-semibold text-white mb-6"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
+                      >
                         Quality Assurance
                       </h3>
                       <ul className="space-y-4 text-blue-100/90">
                         {[
-                          'Data integrity checks',
-                          'Process validation',
-                          'Reconciliation assurance'
+                          "Data integrity checks",
+                          "Process validation",
+                          "Reconciliation assurance",
                         ].map((item, i) => (
-                          <motion.li 
+                          <motion.li
                             key={i}
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -281,7 +300,7 @@ export default function Home() {
               </motion.div>
 
               {/* Control Section */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -295,12 +314,19 @@ export default function Home() {
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-400 to-red-600 text-white flex items-center justify-center">
                           <Settings className="w-8 h-8" />
                         </div>
-                        <h2 className="text-4xl font-bold text-white">Control</h2>
+                        <h2 className="text-4xl font-bold text-white">
+                          Control
+                        </h2>
                       </div>
                       <ul className="space-y-4 text-red-100/90">
-                        {["Workflow management system", "Process scheduling", "Exception handling", "Notification management",
-                         "Recovery procedures"].map((item, i) => (
-                          <motion.li 
+                        {[
+                          "Workflow management system",
+                          "Process scheduling",
+                          "Exception handling",
+                          "Notification management",
+                          "Recovery procedures",
+                        ].map((item, i) => (
+                          <motion.li
                             key={i}
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -314,16 +340,19 @@ export default function Home() {
                       </ul>
                     </div>
                     <div className="bg-gradient-to-br from-white/5 to-transparent p-8 rounded-2xl border border-white/10 shadow-2xl transform group-hover:scale-105 transition-all duration-500">
-                      <h3 className="text-2xl font-semibold text-white mb-6" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
-                      Process Management
+                      <h3
+                        className="text-2xl font-semibold text-white mb-6"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
+                      >
+                        Process Management
                       </h3>
                       <ul className="space-y-4 text-blue-100/90">
                         {[
-                          'Automated workflows',
-                          'Exception notifications',
-                          'Job restart capabilities'
+                          "Automated workflows",
+                          "Exception notifications",
+                          "Job restart capabilities",
                         ].map((item, i) => (
-                          <motion.li 
+                          <motion.li
                             key={i}
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -353,15 +382,15 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="p-8 rounded-3xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/10 shadow-[0_0_25px_rgba(0,0,0,0.3)]"
             >
-              <h2 
+              <h2
                 className="text-5xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-200 to-white"
-                style={{ fontFamily: 'var(--font-space-grotesk)' }}
+                style={{ fontFamily: "var(--font-space-grotesk)" }}
               >
                 Transform Your Data Management
               </h2>
               <Link href="/dashboard">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-lg px-8 py-6"
                 >
                   Access Dashboard
@@ -369,46 +398,49 @@ export default function Home() {
               </Link>
             </motion.div>
           </div>
-        </section>        
-        
+        </section>
       </main>
 
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLogin={handleLogin}
+      />
 
       <footer className="bg-black/50 backdrop-blur-md border-t border-white/10">
         <div className="container mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-8 md:mb-0">
-              <Image 
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BBI_Logo_White-B1geXfwkPqABQuJWmxC14tT8vx6ueV.png" 
-                alt="BBi Logo" 
-                width={150} 
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BBI_Logo_White-B1geXfwkPqABQuJWmxC14tT8vx6ueV.png"
+                alt="BBi Logo"
+                width={150}
                 height={60}
                 className="h-12 w-auto transform hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="text-center md:text-right">
               <p className="text-sm text-blue-200/50 mb-2">
-                © {new Date().getFullYear()} BBi Engineering. All rights reserved.
+                © {new Date().getFullYear()} BBi Engineering. All rights
+                reserved.
               </p>
               <div className="flex justify-center md:justify-end space-x-6">
-                {['Privacy Policy', 'Terms of Service', 'Contact Us'].map((item) => (
-                  <a 
-                    key={item}
-                    href="#" 
-                    className="text-blue-200/70 hover:text-white transition-colors duration-300 text-sm"
-                  >
-                    {item}
-                  </a>
-                ))}
+                {["Privacy Policy", "Terms of Service", "Contact Us"].map(
+                  (item) => (
+                    <a
+                      key={item}
+                      href="#"
+                      className="text-blue-200/70 hover:text-white transition-colors duration-300 text-sm"
+                    >
+                      {item}
+                    </a>
+                  )
+                )}
               </div>
             </div>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
-
-        
-      
