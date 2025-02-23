@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   Database,
-  FileEdit,
   Home,
   LayoutDashboard,
   Package,
   Plus,
-  Trash2,
+  SquareParking,
+  AppWindow,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -21,31 +21,36 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    name: "Schema Changes",
-    href: "/dashboard/ddl",
+    name: "Schema",
+    href: "/dashboard/schema",
     icon: Database,
   },
   {
     name: "Feed Management",
     href: "/dashboard/feeds",
     icon: Home,
-    children: [
-      {
-        name: "New Feed",
-        href: "/dashboard/feeds/new",
-        icon: Plus,
-      },
-      {
-        name: "Edit Feeds",
-        href: "/dashboard/feeds/edit",
-        icon: FileEdit,
-      },
-      {
-        name: "Remove Feeds",
-        href: "/dashboard/feeds/remove",
-        icon: Trash2,
-      },
-    ],
+    // children: [
+    //   {
+    //     name: "New Feed",
+    //     href: "/dashboard/feeds/new",
+    //     icon: Plus,
+    //   },
+    //   {
+    //     name: "Edit Feeds",
+    //     href: "/dashboard/feeds/edit",
+    //     icon: FileEdit,
+    //   },
+    //   {
+    //     name: "Remove Feeds",
+    //     href: "/dashboard/feeds/remove",
+    //     icon: Trash2,
+    //   },
+    // ],
+  },
+  {
+    name: "Parameters",
+    href: "/dashboard/parameters",
+    icon: SquareParking,
   },
   {
     name: "Migration",
@@ -53,7 +58,12 @@ const navigation = [
     icon: Package,
   },
   {
-    name: "Configure ABC",
+    name: "Dags",
+    href: "/dashboard/dag",
+    icon: AppWindow,
+  },
+  {
+    name: "ConfigureABC",
     href: "/dashboard/configureABC",
     icon: Plus,
   },
@@ -91,7 +101,7 @@ export function Sidebar() {
                 <item.icon className="w-5 h-5" />
                 {item.name}
               </Link>
-              {item.children && (
+              {/* {item.children && (
                 <div className="ml-4 mt-1 space-y-1">
                   {item.children.map((child) => (
                     <Link
@@ -109,7 +119,7 @@ export function Sidebar() {
                     </Link>
                   ))}
                 </div>
-              )}
+              )} */}
             </div>
           ))}
         </nav>

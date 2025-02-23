@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchFeed } from "../../utils/fetchFeed";
+import { fetchParams } from "../../utils/fetchParams";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -11,64 +11,65 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import FeedTable from "@/components/FeedTable";
+import ParamsTable from "@/components/ParamsTable";
 import Papa from "papaparse";
-import { updateFeed } from "@/app/utils/updateFeed";
 
-interface FeedData {
-  feed_id: string;
+interface ParamsData {
+  parameters_id: string;
+  parameter_name: string;
+  parameter_value: string;
+  parameter_type: string;
   feed_name: string;
-  create_date: string;
-  file_delta_percent_allow: string;
-  perform_min_max_validations: string;
-  impose_datatypes: string;
-  quality_threshold: string;
-  rename_columns: string;
-  source_type: string;
-  raw_dir: string;
-  workflow_name: string;
-  feed_description: string;
+  default_or_custom: string;
+  batch_id: string;
+  timestamp: string;
+  override_parameter_value: string;
 }
 
-export default function FeedPage() {
+export default function ParamsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tableData, setTableData] = useState<FeedData[]>([]);
-  const [newFeed, setNewFeed] = useState<Omit<FeedData, "feed_id">>({
+  const [tableData, setTableData] = useState<ParamsData[]>([]);
+  const [newParam, setNewParam] = useState<Omit<ParamsData, "parameters_id">>({
+    parameter_name: "",
+    parameter_value: "",
+    parameter_type: "",
     feed_name: "",
-    create_date: "",
-    file_delta_percent_allow: "",
-    perform_min_max_validations: "",
-    impose_datatypes: "",
-    quality_threshold: "",
-    rename_columns: "",
-    source_type: "",
-    raw_dir: "",
-    workflow_name: "",
-    feed_description: "",
+    default_or_custom: "",
+    batch_id: "",
+    timestamp: "",
+    override_parameter_value: "",
   });
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const apiData = await fetchFeed();
-        console.log("Feed Data Received:", apiData);
+        const apiData = await fetchParams();
+        console.log("Params Data Received:", apiData);
+
+        // ✅ Ensure the API response is an array
+        if (!Array.isArray(apiData)) {
+          console.error("🚨 API did not return an array. Response:", apiData);
+          return;
+        }
+
         setTableData(apiData);
       } catch (error) {
-        console.error("Error Fetching Feed Data:", error);
+        console.error("Error Fetching Params Data:", error);
       }
     };
+
     getData();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewFeed({ ...newFeed, [e.target.name]: e.target.value });
+    setNewParam({ ...newParam, [e.target.name]: e.target.value });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    Papa.parse<FeedData>(file, {
+    Papa.parse<ParamsData>(file, {
       header: true,
       skipEmptyLines: true,
       complete: function (results) {
@@ -76,7 +77,7 @@ export default function FeedPage() {
         if (Array.isArray(results.data)) {
           setTableData((prev) => [
             ...prev,
-            ...results.data.filter((row) => row.feed_name),
+            ...results.data.filter((row) => row.parameters_id),
           ]);
         }
       },
@@ -84,28 +85,16 @@ export default function FeedPage() {
   };
 
   const handleDownloadSample = () => {
-    const sampleCsv = `feed_name,create_date,file_delta_percent_allow,quality_threshold,land_filename_pattern_compressed,land_filename_pattern_uncompressed,land_file_extension_pattern_compressed,land_file_extension_pattern_uncompressed,land_dir,raw_dir,glue_workflow_name,feed_description\nSample Feed,2025-01-27,0,95,compressed_pattern,uncompressed_pattern,.csv,.txt,/land,/raw,glue_demo,Sample description`;
+    const sampleCsv = `parameter_name,parameter_value,parameter_type,feed_name,default_or_custom,batch_id,timestamp,override_parameter_value\n sample_param,100,integer,feed1,default,001,2025-01-27T12:00:00Z,200`;
 
     const blob = new Blob([sampleCsv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sample_feed.csv";
+    a.download = "sample_params.csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newFeedWithId = { ...newFeed, feed_id: "" };
-    const success = await updateFeed([newFeedWithId]);
-    if (success) {
-      console.log("Feed updated successfully");
-      setIsModalOpen(false);
-    } else {
-      console.error("Failed to update feed");
-    }
   };
 
   return (
@@ -116,7 +105,7 @@ export default function FeedPage() {
             onClick={() => setIsModalOpen(true)}
             className="bg-gradient-to-r from-blue-500 to-purple-600 text-white"
           >
-            ➕ Add Feed
+            ➕ Add Parameter
           </Button>
           <input
             type="file"
@@ -139,18 +128,18 @@ export default function FeedPage() {
             ⬇️ Download Sample
           </Button>
         </div>
-        <FeedTable tableData={tableData} />
+        <ParamsTable tableData={tableData} />
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="bg-[#000B2E] text-white border border-white/10 rounded-lg shadow-xl p-6 backdrop-blur-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-white">
-              Add New Feed
+              Add New Parameter
             </DialogTitle>
           </DialogHeader>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            {Object.keys(newFeed).map((field) => (
+          <form className="space-y-4">
+            {Object.keys(newParam).map((field) => (
               <div className="mb-4" key={field}>
                 <label className="block font-semibold text-white mb-1">
                   {field.replace(/_/g, " ")}
@@ -158,7 +147,7 @@ export default function FeedPage() {
                 <Input
                   type="text"
                   name={field}
-                  value={newFeed[field as keyof typeof newFeed]}
+                  value={newParam[field as keyof typeof newParam]}
                   onChange={handleInputChange}
                   placeholder={`Enter ${field.replace(/_/g, " ")}`}
                   className="bg-white/10 border border-white/20 text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500"
