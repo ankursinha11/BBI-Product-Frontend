@@ -1,19 +1,19 @@
+import { BASE_URL } from "./config";
+
 interface FeedData {
   feed_id: string;
   feed_name: string;
   create_date: string;
   file_delta_percent_allow: string;
+  perform_min_max_validations: string;
+  impose_datatypes: string;
   quality_threshold: string;
-  land_filename_pattern_compressed: string;
-  land_filename_pattern_uncompressed: string;
-  land_file_extension_pattern_compressed: string;
-  land_file_extension_pattern_uncompressed: string;
-  land_dir: string;
+  rename_columns: string;
+  source_type: string;
   raw_dir: string;
-  glue_workflow_name: string;
+  workflow_name: string;
   feed_description: string;
 }
-
 export async function fetchFeed(): Promise<FeedData[]> {
   try {
     const token =
@@ -24,9 +24,7 @@ export async function fetchFeed(): Promise<FeedData[]> {
       return [];
     }
 
-    const url = `http://localhost:8000/get-data?table_name=feed`;
-
-    const res = await fetch(url, {
+    const res = await fetch(`${BASE_URL}/get-data?table_name=feed`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -54,14 +52,13 @@ export async function fetchFeed(): Promise<FeedData[]> {
       "feed_name",
       "create_date",
       "file_delta_percent_allow",
+      "perform_min_max_validations",
+      "impose_datatypes",
       "quality_threshold",
-      "land_filename_pattern_compressed",
-      "land_filename_pattern_uncompressed",
-      "land_file_extension_pattern_compressed",
-      "land_file_extension_pattern_uncompressed",
-      "land_dir",
+      "rename_columns",
+      "source_type",
       "raw_dir",
-      "glue_workflow_name",
+      "workflow_name",
       "feed_description",
     ];
 
