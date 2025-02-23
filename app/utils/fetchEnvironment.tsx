@@ -1,4 +1,4 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
 export async function fetchAbcCreds(databaseName: string) {
   try {
@@ -6,6 +6,7 @@ export async function fetchAbcCreds(databaseName: string) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
       },
     });
 

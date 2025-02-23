@@ -21,8 +21,8 @@ interface VaultComponentProps {
   validationMessage: string;
   isSubmitted: boolean;
   setIsSubmitted: (value: boolean) => void;
-  isVaultOpen: boolean; // ✅ Added
-  setIsVaultOpen: (value: boolean) => void; // ✅ Added
+  isVaultOpen: boolean;
+  setIsVaultOpen: (value: boolean) => void;
 }
 
 const VaultComponent: React.FC<VaultComponentProps> = ({
@@ -41,7 +41,7 @@ const VaultComponent: React.FC<VaultComponentProps> = ({
         Vault Configuration
       </h2>
 
-      {/* ✅ Status Selection */}
+      {/* Status Selection */}
       <div className="mb-4">
         <h3 className="text-xl text-white mb-2">Select Status</h3>
         <select
@@ -57,7 +57,7 @@ const VaultComponent: React.FC<VaultComponentProps> = ({
         )}
       </div>
 
-      {/* ✅ Vault Configuration Form */}
+      {/* Vault Configuration Form */}
       {status === "Enabled" && (
         <>
           <Table className="border border-white/20 text-white">
@@ -82,7 +82,7 @@ const VaultComponent: React.FC<VaultComponentProps> = ({
             </TableBody>
           </Table>
 
-          {/* ✅ Submit Button */}
+          {/* Submit Button */}
           <div className="flex justify-center mt-4">
             <Button
               onClick={handleVaultSubmit}
@@ -92,17 +92,17 @@ const VaultComponent: React.FC<VaultComponentProps> = ({
             </Button>
           </div>
 
-          {/* ✅ Error Validation Popup */}
+          {/* Error Validation Popup */}
           {validationMessage && (
             <div className="text-red-500 text-center mt-2 font-semibold">
-              ⚠️ {validationMessage}
+              {validationMessage}
             </div>
           )}
 
-          {/* ✅ Success Confirmation Message */}
+          {/* Success Confirmation Message */}
           {isSubmitted && (
             <div className="text-green-500 text-center mt-2 font-semibold">
-              ✅ Submitted Successfully!
+              Submitted Successfully!
             </div>
           )}
         </>

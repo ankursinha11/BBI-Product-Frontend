@@ -1,12 +1,15 @@
+import { BASE_URL, TOKEN } from "./config";
+
 export async function updateAbcConfig(
   databaseName: string,
   configData: Record<string, string>
 ) {
   try {
-    const response = await fetch("http://localhost:8000/abc-config", {
+    const response = await fetch(`${BASE_URL}/abc-config`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
       },
       body: JSON.stringify({ database: databaseName, config: configData }),
     });

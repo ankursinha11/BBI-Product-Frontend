@@ -1,4 +1,4 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
 export interface FeedData {
   feed_id: string;
@@ -21,6 +21,7 @@ export async function updateFeed(updatedFeed: FeedData[]): Promise<boolean> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
       },
       body: JSON.stringify({ feeds: updatedFeed }),
     });

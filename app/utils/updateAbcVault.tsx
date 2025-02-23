@@ -1,4 +1,4 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
 export async function updateAbcVault(
   databaseName: string,
@@ -9,6 +9,7 @@ export async function updateAbcVault(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
       },
       body: JSON.stringify({ database: databaseName, config: vaultData }),
     });

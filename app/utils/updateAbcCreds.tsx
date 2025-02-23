@@ -1,4 +1,4 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
 export async function updateAbcCreds(
   databaseName: string,
@@ -9,6 +9,7 @@ export async function updateAbcCreds(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
       },
       body: JSON.stringify({ databaseName, creds }),
     });

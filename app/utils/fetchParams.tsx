@@ -1,4 +1,4 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
 interface ParamsData {
   parameters_id: string;
@@ -14,11 +14,8 @@ interface ParamsData {
 
 export async function fetchParams(): Promise<ParamsData[]> {
   try {
-    const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QifQ.YbP4we6mqRJDrVV1AJlUbotlJIfMlD7NXEj6tM3LhXI";
-
-    if (!token) {
-      console.error("🚨 No Auth Token Found! Please log in.");
+    if (!TOKEN) {
+      console.error("No Auth Token Found! Please log in.");
       return [];
     }
 
@@ -26,27 +23,24 @@ export async function fetchParams(): Promise<ParamsData[]> {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${TOKEN}`,
       },
     });
 
     if (!res.ok) {
       const errorMessage = await res.text();
-      throw new Error(`❌ Fetch error: ${errorMessage}`);
+      throw new Error(`Fetch error: ${errorMessage}`);
     }
 
     const response = await res.json();
-    console.log("📡 API Response (Raw):", JSON.stringify(response, null, 2));
+    console.log("API Response (Raw):", JSON.stringify(response, null, 2));
 
     if (!response.data || !Array.isArray(response.data)) {
-      console.error("❌ API returned an invalid response format:", response);
+      console.error("API returned an invalid response format:", response);
       return [];
     }
 
-    console.log(
-      "📌 Extracted API Data:",
-      JSON.stringify(response.data, null, 2)
-    );
+    console.log("Extracted API Data:", JSON.stringify(response.data, null, 2));
 
     const columnNames: (keyof ParamsData)[] = [
       "parameters_id",
@@ -70,10 +64,10 @@ export async function fetchParams(): Promise<ParamsData[]> {
       }
     );
 
-    console.log("✅ Converted Data:", JSON.stringify(formattedData, null, 2));
+    console.log("Converted Data:", JSON.stringify(formattedData, null, 2));
     return formattedData;
   } catch (error) {
-    console.error("🚨 Fetch error:", error);
+    console.error("Fetch error:", error);
     return [];
   }
 }
