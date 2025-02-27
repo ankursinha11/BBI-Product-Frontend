@@ -32,10 +32,10 @@ export async function updateParams(
     }
 
     const data: Param[] = await response.json();
-    console.log("✅ Params Data Received:", data);
+    console.log("Params Data Received:", data);
     return data;
   } catch (error) {
-    console.error("❌ Failed to fetch params:", error);
+    console.error("Failed to fetch params:", error);
     return null;
   }
 }

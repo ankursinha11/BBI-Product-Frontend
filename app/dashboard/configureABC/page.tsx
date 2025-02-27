@@ -1,165 +1,98 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { fetchAbcVault } from "@/app/utils/fetchAbcVault";
-import { updateAbcVault } from "@/app/utils/updateAbcVault";
+import React, { useState } from "react";
 import { fetchAbcCreds } from "@/app/utils/fetchAbcCreds";
 import { updateAbcCreds } from "@/app/utils/updateAbcCreds";
-import VaultComponent from "@/components/VaultComponent";
 import DatabaseSelectionComponent from "@/components/DatabaseSelectionComponent";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-/** VaultData Interface */
-export interface VaultData {
-  url: string;
+/**Define Database Data Interface */
+export interface DatabaseData {
+  account?: string;
   user_name?: string;
   password?: string;
-  token?: string;
-  data_mount_point?: string;
+  database?: string;
   schema?: string;
+  host?: string;
   port?: string;
 }
 
 export default function ConfigureABCPage() {
-  /** Vault & Database States */
+  /**State for Database Selection and Credentials */
   const [selectedOption, setSelectedOption] = useState<string>("");
-  const [vaultFormData, setVaultFormData] = useState<VaultData>({
-    url: "",
+  const [databaseFormData, setDatabaseFormData] = useState<DatabaseData>({
+    account: "",
     user_name: "",
     password: "",
-    token: "",
-    data_mount_point: "",
-  });
-
-  const [databaseFormData, setDatabaseFormData] = useState<VaultData>({
-    url: "",
-    user_name: "",
-    password: "",
+    database: "",
     schema: "",
+    host: "",
     port: "",
   });
 
-  const [vaultStatus, setVaultStatus] = useState<string>("Disabled");
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
-  const [isVaultSubmitted, setIsVaultSubmitted] = useState<boolean>(false);
   const [isDatabaseSubmitted, setIsDatabaseSubmitted] =
     useState<boolean>(false);
-  const [validationMessage, setValidationMessage] = useState<string>("");
-  const [isVaultOpen, setIsVaultOpen] = useState<boolean>(true);
   const [isDatabaseOpen, setIsDatabaseOpen] = useState<boolean>(true);
-
-  /** Fetch Vault Credentials ONLY on Mount */
-  useEffect(() => {
-    console.log("📡 Fetching Vault Configuration...");
-
-    fetchAbcVault("default").then((response) => {
-      if (response?.data) {
-        console.log("✅ Vault Data Found:", response.data);
-        setVaultFormData(response.data);
-        setVaultStatus(response.data.enabled ? "Enabled" : "Disabled");
-      } else {
-        console.log("⚠️ No Vault Data Found. Resetting fields.");
-        setVaultFormData({
-          url: "",
-          user_name: "",
-          password: "",
-          token: "",
-          data_mount_point: "",
-        });
-        setVaultStatus("Disabled");
-      }
-    });
-  }, []);
-
-  /**  Handle Vault Status Change */
-  const handleVaultStatusChange = (value: string) => {
-    setVaultStatus(value);
-    setIsUpdatingStatus(true);
-
-    const updatedData =
-      value === "Enabled"
-        ? { ...vaultFormData }
-        : {
-            url: "",
-            user_name: "",
-            password: "",
-            token: "",
-            data_mount_point: "",
-          };
-
-    setVaultFormData(updatedData);
-    setIsUpdatingStatus(false);
-  };
-
-  /**Handle Vault Form Input Changes */
-  const handleVaultChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setVaultFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  /** Handle Vault Submission (AFTER Validation) */
-  const handleVaultSubmit = async () => {
-    console.log("🚀 Submitting Vault Configuration:", vaultFormData);
-
-    // Validate before submission
-    if (!vaultFormData.url?.trim()) {
-      alert("⚠️ URL is required.");
-      return;
-    }
-
-    if (
-      !(vaultFormData.user_name?.trim() && vaultFormData.password?.trim()) &&
-      !vaultFormData.token?.trim()
-    ) {
-      alert("⚠️ Enter either Username & Password OR a Token.");
-      return;
-    }
-
-    setValidationMessage("");
-
-    const formattedData: Record<string, string> = Object.fromEntries(
-      Object.entries(vaultFormData).map(([key, value]) => [key, String(value)])
-    );
-
-    const success = await updateAbcVault("default", formattedData);
-    if (success) {
-      console.log("Vault Configuration updated successfully");
-      setIsVaultSubmitted(true);
-      setTimeout(() => setIsVaultSubmitted(false), 2000);
-    } else {
-      console.error("Failed to update Vault Configuration");
-    }
-  };
+  const [validationMessage, setValidationMessage] = useState<string>("");
+  const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
 
   /** Handle Database Fetch & Selection */
   const handleDatabaseSelect = async (dbName: string) => {
-    console.log(`📡 Fetching Database Credentials for: ${dbName}`);
+    console.log(`Fetching Database Credentials for: ${dbName}`);
 
-    //Store selected database separately (DO NOT fetch Vault data here)
-    setSelectedOption(dbName);
+    setSelectedOption(dbName); //Store selected database name
 
-    try {
-      const dbCreds = await fetchAbcCreds(dbName);
-      if (dbCreds?.data) {
-        console.log("Database Credentials Found:", dbCreds.data);
-
-        // Ensure ONLY databaseFormData is updated (not vaultFormData)
-        setDatabaseFormData(dbCreds.data);
-      } else {
-        console.log("No Database Credentials Found. Resetting fields.");
-        setDatabaseFormData({
-          url: "",
-          user_name: "",
-          password: "",
-          schema: "",
-          port: "",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching Database Credentials:", error);
+    //Fetch database credentials
+    const dbCreds = await fetchAbcCreds(dbName);
+    if (dbCreds?.data) {
+      console.log("Database Credentials Found:", dbCreds.data);
+      setDatabaseFormData(dbCreds.data);
+    } else {
+      console.log("No Database Credentials Found. Resetting fields.");
+      resetDatabaseFields(dbName);
     }
   };
 
-  /** Handle Database Submission */
+  /**Reset Fields Based on Selected Database */
+  const resetDatabaseFields = (dbName: string) => {
+    const defaultValues: DatabaseData = {
+      account: "",
+      user_name: "",
+      password: "",
+      database: "",
+      schema: "",
+      host: "",
+      port: "",
+    };
+
+    if (dbName === "Snowflake") {
+      setDatabaseFormData({
+        account: "",
+        user_name: "",
+        password: "",
+        database: "",
+        schema: "",
+      });
+    } else if (dbName === "PostgreSQL" || dbName === "MySQL") {
+      setDatabaseFormData({
+        host: "",
+        port: "",
+        database: "",
+        user_name: "",
+        password: "",
+      });
+    } else {
+      setDatabaseFormData(defaultValues);
+    }
+  };
+
+  /**Handle Database Submission */
   const handleDatabaseSubmit = async () => {
     console.log("Submitting Database Configuration:", databaseFormData);
 
@@ -171,14 +104,13 @@ export default function ConfigureABCPage() {
       ])
     );
 
-    const success =
-      (await updateAbcVault(selectedOption, formattedData)) &&
-      (await updateAbcCreds(selectedOption, formattedData));
+    const success = await updateAbcCreds(selectedOption, formattedData);
 
     if (success) {
       console.log("Database Configuration updated successfully");
       setIsDatabaseSubmitted(true);
       setTimeout(() => setIsDatabaseSubmitted(false), 2000);
+      setIsConfirmOpen(false);
     } else {
       console.error("Failed to update Database Configuration");
     }
@@ -190,7 +122,7 @@ export default function ConfigureABCPage() {
         Configure ABC
       </h1>
 
-      {/*Display Validation Message */}
+      {/* Display Validation Message */}
       {validationMessage && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50">
           <div className="bg-red-500 text-white px-6 py-3 rounded-md shadow-lg text-lg font-semibold">
@@ -199,22 +131,7 @@ export default function ConfigureABCPage() {
         </div>
       )}
 
-      {/* Vault Component */}
-      <VaultComponent
-        status={vaultStatus}
-        handleStatusChange={handleVaultStatusChange}
-        isUpdatingStatus={isUpdatingStatus}
-        formData={vaultFormData}
-        handleChange={handleVaultChange}
-        handleVaultSubmit={handleVaultSubmit}
-        validationMessage={validationMessage}
-        isSubmitted={isVaultSubmitted}
-        setIsSubmitted={setIsVaultSubmitted}
-        isVaultOpen={isVaultOpen}
-        setIsVaultOpen={setIsVaultOpen}
-      />
-
-      {/* Database Selection Component */}
+      {/*atabase Selection Component */}
       <DatabaseSelectionComponent
         selectedOption={selectedOption}
         setSelectedOption={setSelectedOption}
@@ -227,10 +144,34 @@ export default function ConfigureABCPage() {
             [e.target.name]: e.target.value,
           }))
         }
-        handleDatabaseSubmit={handleDatabaseSubmit}
+        handleDatabaseSubmit={() => setIsConfirmOpen(true)}
         isDatabaseOpen={isDatabaseOpen}
         setIsDatabaseOpen={setIsDatabaseOpen}
       />
+
+      {/*Confirmation Dialog */}
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent className="bg-[#1E1E1E] text-white border border-white/20 rounded-lg p-6 shadow-lg">
+          <DialogHeader>
+            <DialogTitle>Confirm Database Configuration</DialogTitle>
+          </DialogHeader>
+          <p className="text-white text-center">
+            Are you sure? This will overwrite the existing ABC configuration for{" "}
+            <strong>{selectedOption}</strong>.
+          </p>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-green-500 text-white"
+              onClick={handleDatabaseSubmit}
+            >
+              Confirm
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
