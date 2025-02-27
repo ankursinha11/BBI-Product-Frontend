@@ -1,9 +1,12 @@
+import { TOKEN } from "./config";
+
 export async function fetchAbcConfig(databaseName: string) {
   try {
     const response = await fetch(`http://localhost:8000/abc-config`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
       },
     });
 

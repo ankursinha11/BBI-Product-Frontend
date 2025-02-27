@@ -1,4 +1,4 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
 interface FeedData {
   feed_id: string;
@@ -16,10 +16,7 @@ interface FeedData {
 }
 export async function fetchFeed(): Promise<FeedData[]> {
   try {
-    const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QifQ.YbP4we6mqRJDrVV1AJlUbotlJIfMlD7NXEj6tM3LhXI";
-
-    if (!token) {
+    if (!TOKEN) {
       console.error("No Auth Token Found! Please log in.");
       return [];
     }
@@ -28,7 +25,7 @@ export async function fetchFeed(): Promise<FeedData[]> {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${TOKEN}`,
       },
     });
 

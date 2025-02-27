@@ -1,4 +1,4 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
 export async function fetchAbcVault(databaseName: string) {
   try {
@@ -6,6 +6,7 @@ export async function fetchAbcVault(databaseName: string) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
       },
     });
 
@@ -16,7 +17,7 @@ export async function fetchAbcVault(databaseName: string) {
     }
 
     const data = await response.json();
-    console.log(`ABC Config Data Received for ${databaseName}:`, data);
+    console.log(`ABC VAULT Data Received for ${databaseName}:`, data);
     return data;
   } catch (error) {
     console.error(`Failed to fetch ABC config for ${databaseName}:`, error);

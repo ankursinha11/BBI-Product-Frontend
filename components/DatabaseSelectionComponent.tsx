@@ -16,41 +16,39 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export interface VaultData {
-  url: string;
+/** Define Interface for Database Data */
+export interface DatabaseData {
+  account?: string;
   user_name?: string;
   password?: string;
-  token?: string;
-  data_mount_point?: string;
+  database?: string;
   schema?: string;
+  host?: string;
   port?: string;
 }
 
 interface DatabaseSelectionProps {
   selectedOption: string;
   setSelectedOption: React.Dispatch<React.SetStateAction<string>>;
-  fetchAbcVault: (value: string) => Promise<Partial<VaultData> | null>;
-  fetchAbcCreds: (value: string) => Promise<Partial<VaultData> | null>;
-  formData: VaultData;
-  setFormData: React.Dispatch<React.SetStateAction<VaultData>>;
+  fetchAbcCreds: (dbName: string) => Promise<{ data: DatabaseData } | null>;
+  formData: DatabaseData;
+  setFormData: React.Dispatch<React.SetStateAction<DatabaseData>>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleDatabaseSubmit: () => void;
-  isDatabaseOpen: boolean; // ✅ Added
-  setIsDatabaseOpen: (value: boolean) => void; // ✅ Added
+  isDatabaseOpen: boolean;
+  setIsDatabaseOpen: (value: boolean) => void;
 }
 
-/** Required fields for each database */
-const databaseConfigs: Record<string, (keyof VaultData)[]> = {
-  Snowflake: ["url", "user_name", "password", "data_mount_point"],
-  "Ab Initio": ["url", "token", "data_mount_point"],
-  PostgreSQL: ["url", "user_name", "password", "schema", "port"],
-  MySQL: ["url", "user_name", "password", "port"],
+/**Required Fields for Each Database */
+const databaseConfigs: Record<string, (keyof DatabaseData)[]> = {
+  Snowflake: ["account", "user_name", "password", "database", "schema"],
+  PostgreSQL: ["host", "port", "database", "user_name", "password"],
+  MySQL: ["host", "port", "database", "user_name", "password"],
 };
 
 const DatabaseSelectionComponent: React.FC<DatabaseSelectionProps> = ({
   selectedOption,
   setSelectedOption,
-  fetchAbcVault,
   fetchAbcCreds,
   formData,
   setFormData,
@@ -59,34 +57,31 @@ const DatabaseSelectionComponent: React.FC<DatabaseSelectionProps> = ({
 }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const handleDatabaseChange = async (value: string) => {
-    setSelectedOption(value);
+  /**Fetch Database Credentials on Selection */
+  const handleDatabaseChange = async (dbName: string) => {
+    console.log(`📡 Fetching Database Credentials for: ${dbName}`);
+    setSelectedOption(dbName);
 
     try {
-      const vaultData = await fetchAbcVault(value);
-      const credsData = await fetchAbcCreds(value);
+      //Fetch database credentials only
+      const credsData = await fetchAbcCreds(dbName);
 
-      if (vaultData) {
+      if (credsData?.data) {
+        console.log("✅ Database Credentials Found:", credsData.data);
         setFormData((prev) => ({
           ...prev,
-          ...vaultData,
+          ...credsData.data, // Update only database-specific fields
         }));
       } else {
-        const defaultValues = databaseConfigs[value]?.reduce(
+        console.log("⚠️ No Database Credentials Found. Resetting fields.");
+        const defaultValues = databaseConfigs[dbName]?.reduce(
           (acc, field) => ({ ...acc, [field]: "" }),
-          {} as VaultData
+          {} as DatabaseData
         );
         setFormData(defaultValues);
       }
-
-      if (credsData) {
-        setFormData((prev) => ({
-          ...prev,
-          ...credsData,
-        }));
-      }
     } catch (error) {
-      console.error("Error fetching database config:", error);
+      console.error("Error fetching database credentials:", error);
     }
   };
 
@@ -96,7 +91,7 @@ const DatabaseSelectionComponent: React.FC<DatabaseSelectionProps> = ({
         Database Selection
       </h2>
 
-      {/* ✅ Database Selection Dropdown */}
+      {/* Database Selection Dropdown */}
       <Select onValueChange={handleDatabaseChange}>
         <SelectTrigger className="w-full bg-white/10 border border-white/20 text-white">
           <SelectValue placeholder="Choose a database" />
@@ -116,11 +111,11 @@ const DatabaseSelectionComponent: React.FC<DatabaseSelectionProps> = ({
             Selected Database: {selectedOption}
           </h3>
 
-          {/* ✅ Dynamically Render Form Fields */}
+          {/* Render Dynamic Form Fields Based on Database Type */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              setIsConfirmOpen(true); // ✅ Open Confirmation Dialog
+              setIsConfirmOpen(true); // Open Confirmation Dialog
             }}
           >
             <Table className="border border-white/20 text-white mt-4">
@@ -157,14 +152,14 @@ const DatabaseSelectionComponent: React.FC<DatabaseSelectionProps> = ({
         </>
       )}
 
-      {/* ✅ Confirmation Dialog */}
+      {/*Confirmation Dialog */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
         <DialogContent className="bg-[#1E1E1E] text-white border border-white/20 rounded-lg p-6 shadow-lg">
           <DialogHeader>
             <DialogTitle>Confirm Submission</DialogTitle>
           </DialogHeader>
           <p className="text-white text-center">
-            Are you sure all prior ABC Config will be lost for ever.
+            Are you sure? All prior ABC Config will be lost forever.
           </p>
           <div className="flex justify-end gap-4 mt-4">
             <Button variant="outline" onClick={() => setIsConfirmOpen(false)}>
@@ -173,7 +168,7 @@ const DatabaseSelectionComponent: React.FC<DatabaseSelectionProps> = ({
             <Button
               className="bg-green-500 text-white"
               onClick={() => {
-                handleDatabaseSubmit(); // ✅ Submit on confirmation
+                handleDatabaseSubmit(); // ubmit on confirmation
                 setIsConfirmOpen(false);
               }}
             >

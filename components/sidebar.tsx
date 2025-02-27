@@ -63,7 +63,12 @@ const navigation = [
     icon: AppWindow,
   },
   {
-    name: "ConfigureABC",
+    name: "Configure Enviornment",
+    href: "/dashboard/configureEnviornment",
+    icon: Plus,
+  },
+  {
+    name: "Configure ABC",
     href: "/dashboard/configureABC",
     icon: Plus,
   },

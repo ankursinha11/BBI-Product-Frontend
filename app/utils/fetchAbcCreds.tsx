@@ -1,25 +1,36 @@
-import { BASE_URL } from "./config";
+import { BASE_URL, TOKEN } from "./config";
 
-export async function fetchAbcCreds(databaseName: string) {
+export async function fetchAbcCreds(dbName: string) {
   try {
-    const response = await fetch(`${BASE_URL}/abc-config?type=abc_creds`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    console.log(`Fetching ABC Credentials for: ${dbName}`);
 
-    if (!response.ok) {
-      throw new Error(
-        `Error fetching ABC config for ${databaseName}: ${response.statusText}`
-      );
+    const res = await fetch(
+      `${BASE_URL}/abc-config/?type=abc_creds&db=${dbName}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorMsg = await res.text();
+      throw new Error(`Fetch failed: ${errorMsg}`);
     }
 
-    const data = await response.json();
-    console.log(`ABC Config Data Received for ${databaseName}:`, data);
-    return data;
+    const response = await res.json();
+    console.log("Database Config Received:", response);
+
+    if (!response?.data) {
+      console.warn("⚠️ No data in response!");
+      return null;
+    }
+
+    return response;
   } catch (error) {
-    console.error(`Failed to fetch ABC config for ${databaseName}:`, error);
+    console.error("Failed to fetch ABC creds:", error);
     return null;
   }
 }
