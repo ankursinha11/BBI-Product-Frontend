@@ -6,6 +6,7 @@ import { Space_Grotesk } from "next/font/google";
 import { Sidebar } from "../../components/sidebar";
 import { LoginModal } from "@/components/LoginModal";
 import type React from "react"; // Added import for React
+import { getCookie } from "cookies-next";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -22,7 +23,7 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    const token = getCookie('access_token');
     if (token) {
       setIsLoggedIn(true);
     } else {
@@ -30,17 +31,9 @@ export default function DashboardLayout({
     }
   }, []);
 
-  const handleLogin = async (username: string, password: string) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    if (username === "demo" && password === "password") {
-      localStorage.setItem("authToken", "dummyToken");
-      setIsLoggedIn(true);
-      setIsLoginModalOpen(false);
-    } else {
-      throw new Error("Invalid credentials");
-    }
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setIsLoginModalOpen(false);
   };
 
   if (!isLoggedIn) {
@@ -48,7 +41,7 @@ export default function DashboardLayout({
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => router.push("/")}
-        onLogin={handleLogin}
+        onLoginSuccess={handleLoginSuccess}
       />
     );
   }

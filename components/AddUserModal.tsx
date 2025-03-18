@@ -1,3 +1,4 @@
+// components/AddUserModal.tsx
 "use client";
 
 import { useState } from "react";
@@ -5,18 +6,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loginUser } from "@/lib/api";
-import { setCookie } from 'cookies-next';
+import { createUser } from "@/lib/api";
 
-interface LoginModalProps {
+interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess: () => void;
+  onUserAdded?: () => void; // Optional: Callback for when user is added
 }
 
-export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps) {
+export function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserModalProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user"); // Default role
+  const [clientId, setClientId] = useState(1); //  Set a default or get dynamically
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,17 +27,25 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
     setError("");
     setIsLoading(true);
     try {
-      const data = await loginUser(username, password);
-      console.log(data);
-      setCookie('access_token', data.access_token, {
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
-      });
-      onLoginSuccess();
-      onClose();
+      // Get the token from the cookie
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("access_token="))
+        ?.split("=")[1];
+
+      if (!token) {
+        setError("Not authorized to create users.");
+        setIsLoading(false);
+        return;
+      }
+
+      await createUser(username, password, role, clientId, token);
+      onClose(); // Close the modal
+      if (onUserAdded) {
+        onUserAdded(); // Call the optional callback
+      }
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      setError(err.message || "Failed to create user");
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +76,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
               <X size={24} />
             </button>
             <h2 className="text-3xl font-bold text-white mb-6 font-display">
-              Login
+              Add User
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -89,21 +99,39 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
                   required
                 />
               </div>
-              {error && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-red-400 text-sm"
+              <div>
+                <label htmlFor="role"  className="block text-sm font-medium text-white">Role:</label>
+                <select
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white p-2 rounded-md w-full"
                 >
-                  {error}
-                </motion.p>
+                  <option value="user">User</option>
+                  <option value="viewer">Viewer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Client ID"
+                  value={clientId}
+                  onChange={(e) => setClientId(parseInt(e.target.value, 10))}
+                  className="bg-white/10 border-white/20 text-white placeholder-white/50"
+                  required
+                />
+              </div>
+
+              {error && (
+                <p className="text-red-500 text-sm">{error}</p>
               )}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg"
                 disabled={isLoading}
               >
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Creating User..." : "Create User"}
               </Button>
             </form>
           </motion.div>
